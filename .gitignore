@@ -1,0 +1,6 @@
+*.log
+*.py[cod]
+*cache
+.coverage*
+/coverage.xml
+/dist

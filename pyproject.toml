@@ -1,0 +1,86 @@
+[project]
+name = "sensirion-ble"
+description = "Manage Sensirion BLE devices"
+authors = [
+    { name = "Aarni Koskela", email = "akx@iki.fi" },
+]
+requires-python = ">=3.9"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/akx/sensirion-ble"
+documentation = "https://sensirion-ble.readthedocs.io"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries",
+]
+packages = [
+    { include = "sensirion_ble", from = "src" },
+]
+dependencies = [
+    "bluetooth-data-tools~=0.1",
+    "bluetooth-sensor-state-data~=1.6",
+    "home-assistant-bluetooth~=1.6",
+    "sensor-state-data~=2.9",
+]
+dynamic = [
+ "version",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/akx/sensirion-ble/issues"
+"Changelog" = "https://github.com/akx/sensirion-ble/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "src/sensirion_ble/__init__.py"
+
+[tool.hatch.build]
+only-packages = true
+
+[tool.pytest.ini_options]
+addopts = "-v -Wdefault --cov=sensirion_ble --cov-report=term-missing:skip-covered"
+pythonpath = ["src"]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "@overload",
+    "if TYPE_CHECKING",
+    "raise NotImplementedError",
+]
+
+[tool.isort]
+profile = "black"
+known_first_party = ["sensirion_ble", "tests"]
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+mypy_path = "src/"
+no_implicit_optional = true
+show_error_codes = true
+warn_unreachable = true
+warn_unused_ignores = true
+exclude = [
+    'docs/.*',
+    'setup.py',
+]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+allow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "docs.*"
+ignore_errors = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
