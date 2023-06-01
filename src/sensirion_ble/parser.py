@@ -1,41 +1,25 @@
 from __future__ import annotations
 
 import logging
-import struct
 
 from bluetooth_data_tools import short_address
 from bluetooth_sensor_state_data import BluetoothData
 from home_assistant_bluetooth import BluetoothServiceInfo
-from sensor_state_data import DeviceClass, Units
 
 from .const import COMPANY_IDENTIFIER
+from .converters import CONVERTERS
+from .types import ConversionResult
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def _convert_advertisement(
-    raw_data: bytes,
-) -> tuple[str | None, dict[tuple[DeviceClass, Units], float]] | None:
+def _convert_advertisement(raw_data: bytes) -> ConversionResult | None:
     """
     Convert a Sensirion advertisement to a device name and a dictionary of sensor values.
     """
-    if raw_data[:2] == b"\x00\x08":  # Sample type 8
-        temp_ticks, humidity_ticks, co2 = struct.unpack("<hhh", raw_data[4:10])
-        # Conversion:
-        # T = - 45 + ((175.0 * ticks) / (2^16 - 1))
-        # RH = (100.0 * ticks) / (2^16 - 1)
-        # CO2 = transmitted value
-        temp = -45 + ((175.0 * temp_ticks) / (2**16 - 1))
-        humidity = (100.0 * humidity_ticks) / (2**16 - 1)
-        data = {
-            # The datasheet for the SCD4x sensor states that the accuracy
-            # of the temperature sensor is ±0.8°C, so one digit after the
-            # decimal point should be enough.
-            (DeviceClass.TEMPERATURE, Units.TEMP_CELSIUS): round(temp, 1),
-            (DeviceClass.HUMIDITY, Units.PERCENTAGE): round(humidity, 1),
-            (DeviceClass.CO2, Units.CONCENTRATION_PARTS_PER_MILLION): co2,
-        }
-        return (raw_data[2:4].hex().upper(), data)
+    converter = CONVERTERS.get(raw_data[:2])
+    if converter:
+        return converter(raw_data)
     _LOGGER.debug("Data format not supported: %s", raw_data)
     return None
 
