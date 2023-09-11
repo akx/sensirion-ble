@@ -13,7 +13,7 @@ TEMP_CELSIUS = (SensorDeviceClass.TEMPERATURE, Units.TEMP_CELSIUS)
 
 def _convert_type_4(raw_data: bytes) -> ConversionResult:
     # SHT3x gadgets. UNTESTED.
-    temp_ticks, humidity_ticks = struct.unpack("<hh", raw_data[4:8])
+    temp_ticks, humidity_ticks = struct.unpack("<HH", raw_data[4:8])
     # Conversion:
     # T = - 45 + ((175.0 * ticks) / (2^16 - 1))
     # RH = (100.0 * ticks) / (2^16 - 1)
@@ -28,7 +28,7 @@ def _convert_type_4(raw_data: bytes) -> ConversionResult:
 
 def _convert_type_6(raw_data: bytes) -> ConversionResult:
     # SHT4x gadgets. UNTESTED.
-    temp_ticks, humidity_ticks = struct.unpack("<hh", raw_data[4:8])
+    temp_ticks, humidity_ticks = struct.unpack("<HH", raw_data[4:8])
     # Conversion:
     # T = - 45 + ((175.0 * ticks) / (2^16 - 1))
     # RH = -6 + (125.0 * ticks) / (2^16 - 1)
@@ -43,7 +43,7 @@ def _convert_type_6(raw_data: bytes) -> ConversionResult:
 
 def _convert_type_8(raw_data: bytes) -> ConversionResult:
     # Sensirion MyCO2.
-    temp_ticks, humidity_ticks, co2 = struct.unpack("<hhh", raw_data[4:10])
+    temp_ticks, humidity_ticks, co2 = struct.unpack("<HHH", raw_data[4:10])
     # Conversion:
     # T = - 45 + ((175.0 * ticks) / (2^16 - 1))
     # RH = (100.0 * ticks) / (2^16 - 1)
