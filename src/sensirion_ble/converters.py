@@ -27,7 +27,7 @@ def _convert_type_4(raw_data: bytes) -> ConversionResult:
 
 
 def _convert_type_6(raw_data: bytes) -> ConversionResult:
-    # SHT4x gadgets. UNTESTED.
+    # SHT4x gadgets.
     temp_ticks, humidity_ticks = struct.unpack("<HH", raw_data[4:8])
     # Conversion:
     # T = - 45 + ((175.0 * ticks) / (2^16 - 1))
