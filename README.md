@@ -6,6 +6,7 @@ Parser for Sensirion BLE devices.
 
 * [MyCO2 (aka SCD4x CO2 Gadget)](https://sensirion.com/products/catalog/SCD4x-CO2-Gadget/)
 * [SHT43 DemoBoard](https://sensirion.com/products/catalog/SHT43-DemoBoard)
+* Air Quality Minion
 
 ## Untested devices
 

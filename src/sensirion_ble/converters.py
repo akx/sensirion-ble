@@ -9,6 +9,26 @@ from sensirion_ble.types import ConversionResult
 CO2_PPM = (SensorDeviceClass.CO2, Units.CONCENTRATION_PARTS_PER_MILLION)
 RH_PERCENTAGE = (SensorDeviceClass.HUMIDITY, Units.PERCENTAGE)
 TEMP_CELSIUS = (SensorDeviceClass.TEMPERATURE, Units.TEMP_CELSIUS)
+TVOC_RAW = (SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS, Units.CONCENTRATION_PARTS_PER_BILLION)
+AQI = (SensorDeviceClass.AQI, None)
+
+def _convert_type_3(raw_data: bytes) -> ConversionResult:
+    # AQ Minion
+    temp_ticks, humidity_ticks, aqi, tvoc_raw, = struct.unpack("<HHHH", raw_data[4:12])
+    # Conversion:
+    # T = -45 + ((175.0 * ticks) / (2^16 - 1))
+    # RH = (100.0 * ticks) / (2^16 - 1)
+    # AQI = transmitted value (Air Quality Index)
+    # VOC = transmitted value
+    temp = -45 + ((175.0 * temp_ticks) / (2**16 - 1))
+    humidity = (100.0 * humidity_ticks) / (2**16 - 1)
+    data = {
+        TEMP_CELSIUS: round(temp, 1),
+        RH_PERCENTAGE: round(humidity, 1),
+        AQI: aqi,
+        TVOC_RAW: tvoc_raw,
+    }
+    return ConversionResult(raw_data[2:4].hex().upper(), data)
 
 
 def _convert_type_4(raw_data: bytes) -> ConversionResult:
@@ -62,6 +82,7 @@ def _convert_type_8(raw_data: bytes) -> ConversionResult:
 
 
 CONVERTERS = {
+    b"\x00\x03": _convert_type_3,
     b"\x00\x04": _convert_type_4,
     b"\x00\x06": _convert_type_6,
     b"\x00\x08": _convert_type_8,
