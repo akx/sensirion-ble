@@ -1,6 +1,5 @@
 import struct
 
-import pytest
 from home_assistant_bluetooth import BluetoothServiceInfo
 from sensor_state_data import DeviceClass, DeviceKey
 
@@ -62,21 +61,21 @@ def test_parsing_type_20():
     assert voc.name == "VOC index"
 
 
-@pytest.mark.parametrize("sample_type", sorted(SAMPLE_FIELDS))
-def test_sample_fields(sample_type):
-    fields = SAMPLE_FIELDS[sample_type]
-    payload = bytes([0, sample_type, 0xAB, 0xCD]) + struct.pack(
-        f"<{len(fields)}H", *range(1000, 1000 + len(fields))
-    )
-    device = SensirionBluetoothDeviceData()
-    up = device.update(bytes_to_service_info(payload))
-    assert up.devices[None].name == "MyCO2 ABCD"
-    keys = {key.key for key in up.entity_values} - {"signal_strength"}
-    assert keys == {sensor.key or sensor.device_class for sensor, _ in fields}
-    # a truncated sample is ignored
-    assert not SensirionBluetoothDeviceData().supported(
-        bytes_to_service_info(payload[:-1])
-    )
+def test_sample_fields():
+    for sample_type, fields in sorted(SAMPLE_FIELDS.items()):
+        payload = bytes([0, sample_type, 0xAB, 0xCD]) + struct.pack(
+            f"<{len(fields)}H", *range(1000, 1000 + len(fields))
+        )
+        device = SensirionBluetoothDeviceData()
+        up = device.update(bytes_to_service_info(payload))
+        assert up.devices[None].name == "MyCO2 ABCD", sample_type
+        keys = {key.key for key in up.entity_values} - {"signal_strength"}
+        expected = {sensor.key or sensor.device_class for sensor, _ in fields}
+        assert keys == expected, sample_type
+        # a truncated sample is ignored
+        assert not SensirionBluetoothDeviceData().supported(
+            bytes_to_service_info(payload[:-1])
+        ), sample_type
 
 
 def test_pm_sample():
