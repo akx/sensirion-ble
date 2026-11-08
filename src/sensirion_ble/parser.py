@@ -42,10 +42,13 @@ class SensirionBluetoothDeviceData(BluetoothData):
         self.set_device_manufacturer("Sensirion AG")
         identifier = identifier or short_address(service_info.address)
         self.set_device_name(f"{service_info.name} {identifier}")
-        for (device_class, unit), value in data.items():
+        for sensor, value in data.items():
+            key = sensor.key or sensor.device_class
+            assert key is not None
             self.update_sensor(
-                key=device_class,
-                device_class=device_class,
-                native_unit_of_measurement=unit,
+                key=key,
+                device_class=sensor.device_class,
+                native_unit_of_measurement=sensor.unit,
                 native_value=value,
+                name=sensor.name,
             )
